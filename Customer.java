@@ -1,12 +1,5 @@
 import java.io.*;
-import java.lang.annotation.*;
 
-@ClassPreamble(
-      author = "Joey", 
-      date = "07/05/2020", 
-      lastModified = "02/05/2020", 
-      reviewers = {"Ana", "Amy", "David"}
-   )
 public class Customer implements Serializable{
    private String name;
    private String address;
