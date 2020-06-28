@@ -2,14 +2,27 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+/**
+* The server allows communication between the auction and the client
+*
+* @author Guannan Zhao
+* @version %I%, %G%
+* @since 1.0
+*/
 public class AuctionServer extends Thread{
+   
+   // These variables are required for communication with clients
    private ServerSocket serverSocket;
    private ObjectInputStream in;
    private ObjectOutputStream out;
    private Socket socket;
    private boolean online;
    public static int SERVER_PORT = 8080;
+   
+   // This is the model on which we are auctioning
    private Auction auction;
+   
+   // Keep the application so we can update it when we change info
    private AuctionServerApp serverApplication;
    
    public AuctionServer(Auction model){
@@ -21,8 +34,10 @@ public class AuctionServer extends Thread{
    
    public Auction getAuction(){return auction;}
    
+   // Allow a server application to register for updates to the model
    public void registerForUpdates(AuctionServerApp app){serverApplication = app;}
    
+   // Attempt to bring the server online
    public boolean goOnline(){
       try{
          serverSocket = new ServerSocket(SERVER_PORT);
@@ -38,13 +53,11 @@ public class AuctionServer extends Thread{
    }
    
    /**
-   * causes this server to go offline. {@literal close()} is important. {@link AuctionItem#getBid() acquire the Bid method}
+   * shut down the server connection. 
    *
    * @return the boolean indicating offline or not
-   * @see #goOnline()
-   * @see Auction
+   * @see java.net.ServerSocket#close()
    * @since 1.0
-   * @inheritDoc
    */
    public boolean goOffline(){
       try{
@@ -60,6 +73,7 @@ public class AuctionServer extends Thread{
       return online; 
    }
    
+   // Try disconnecting from the client
    private boolean closeConnectFromClient(){
       try{
          if(socket != null){
@@ -75,22 +89,31 @@ public class AuctionServer extends Thread{
       }   
    }
    
+   // Accept incoming messages from clients forever, provided that the server is online
    @Override
    public void run(){
       while(online){
          try{
+            
+            // Wait for an incoming message
             socket = serverSocket.accept();
          }
          catch(IOException e){System.out.println("SERVER: Error connecting to a client");}
          
          try{
+            
+            // Make object streams for the socket
             in = new ObjectInputStream(socket.getInputStream());
             out = new ObjectOutputStream(socket.getOutputStream());
+            
+            // Hold initial command message
             String receiveMsg = (String)in.readObject();
             System.out.println("SERVER Received: " + receiveMsg);           
                   
                if(receiveMsg != null){
                   char initialOfMsg = receiveMsg.charAt(0);
+                  
+                  // Dispatch to the helper methods
                   switch(initialOfMsg){
                      case 'r': registerClient(); break;
                      case 'b': handleIncomingBid(); break;
@@ -106,13 +129,12 @@ public class AuctionServer extends Thread{
           catch(IOException e){System.out.println("SERVER: Error receiving message from the client");}
           finally{
             System.out.println("SERVER: Closing client connection");
-            //in.close();
-            //out.close();
             closeConnectFromClient();
           }
       }
    }
    
+   // Handle an incoming request for a client to be registered
    private void registerClient(){
       Customer c = null;
       try{
@@ -135,10 +157,13 @@ public class AuctionServer extends Thread{
       catch(IOException e){System.out.println("SERVER: Error sending message to the client");}
    }
    
+   // Handle an incoming request for a client to make a bid
    private void handleIncomingBid(){
       String name = "";
       float amount = 0;
       try{
+         
+         // Get the client's name and bid
          name = (String)in.readObject();
          amount = ((Float)in.readObject()).floatValue();
       }
@@ -155,10 +180,13 @@ public class AuctionServer extends Thread{
          out.flush();   
       }
       catch(IOException e){System.out.println("SERVER: Error receiving message from the client");}
+      
+      // Update the server application to reflect the new bid information
       if(serverApplication != null) 
          serverApplication.update();  
    }
    
+   // Handle an incoming request for a client to have a catalog
    private void handleCatalogRequest(){
       ArrayList<AuctionItem> catalog = auction.getInventory();
       try{
@@ -168,6 +196,7 @@ public class AuctionServer extends Thread{
       catch(IOException e){System.out.println("SERVER: Error sending catalog to the client");}   
    }
    
+   // Handle an incoming request for the latest bid info
    private void handleUpdateRequest(){
       try{
          out.writeObject(auction.getBidItem());
