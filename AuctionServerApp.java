@@ -7,6 +7,13 @@ import java.io.*;
 import java.net.*;
 import java.text.*;
 
+/**
+* This class represents the server GUI that is used by the person who is running the auction.
+*
+* @author Guannan Zhao
+* @version %I%, %G%
+* @since 1.0
+*/
 public class AuctionServerApp extends JFrame implements DialogClientInterface{
    private JTextField descriptionField, bidField, bidderField, statusField;
    private JButton addButton, removeButton, stopButton, upForBidButton;
@@ -14,12 +21,19 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
    private JList inventoryList;
    
    private ListSelectionListener listListener;
+   
+   // Records the index of the currently selected item in the inventory list
    private int selectedIndex;
    
+   // The server that handles all communication work
    private AuctionServer server; 
+   
    private AuctionItemDialog dialog;
+   
+   // Item being added to auction
    private AuctionItem newAuctionItem; 
    
+   // This image gets shown when there is nothing up for bid
    private static String BLANK_IMAGE = "blankItem.jpg";
    
    public AuctionServerApp(){this(new AuctionServer(new Auction()));}
@@ -64,6 +78,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
          }
       });
       
+      // When the window is first opened, go online
       addWindowListener(new WindowAdapter(){
          public void windowOpened(WindowEvent e){
             if(server.goOnline())
@@ -73,6 +88,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
          }
       });
       
+      // When the window is closed, go offline
       addWindowListener(new WindowAdapter(){
          public void windowClosing(WindowEvent e){
             if(!server.goOffline())
@@ -87,6 +103,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       update();     
    }
    
+   // Update all the components
    public void update(){
       inventoryList.removeListSelectionListener(listListener);
       updateList();
@@ -94,7 +111,6 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       updateDescriptionField();
       updateBidField();
       updateBidderField();
-      //updateStatusField();
       updateRemoveButton();
       updateStopButton();
       updateUpForBidButton();
@@ -191,6 +207,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       upForBidButton.setEnabled(!server.getAuction().hasBidItem());
    }
    
+   // Build the frame by adding all the components
    private void initializeComponents(){
       GridBagLayout layout = new GridBagLayout();
       GridBagConstraints constraints = new GridBagConstraints();
@@ -215,7 +232,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       layout.setConstraints(aLabel, constraints);
       add(aLabel);
       
-      pictureLabel = new JLabel();//don't need to initialize here 
+      pictureLabel = new JLabel();
       constraints.gridy = 1;
       constraints.weightx = 1;
       constraints.weighty = 1;
@@ -231,7 +248,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       layout.setConstraints(aLabel, constraints);
       add(aLabel);
       
-      descriptionField = new JTextField();//don't need to initialize here 
+      descriptionField = new JTextField();
       descriptionField.setEditable(false);
       constraints.gridy = 3;
       constraints.weightx = 1;
@@ -246,7 +263,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       layout.setConstraints(aLabel, constraints);
       add(aLabel);
       
-      bidField = new JTextField();//don't need to initialize here
+      bidField = new JTextField();
       bidField.setEditable(false);
       constraints.gridy = 5;
       constraints.weightx = 1;
@@ -261,7 +278,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       layout.setConstraints(aLabel, constraints);
       add(aLabel);
       
-      bidderField = new JTextField(); //don't need to initialize here
+      bidderField = new JTextField(); 
       bidderField.setEditable(false);
       constraints.gridy = 7;
       constraints.weightx = 1;
@@ -276,7 +293,7 @@ public class AuctionServerApp extends JFrame implements DialogClientInterface{
       layout.setConstraints(stopButton, constraints);
       add(stopButton);
 
-      inventoryList = new JList();//don't need to initialize here
+      inventoryList = new JList();
       JScrollPane scrollPane = new JScrollPane(inventoryList, 
                                                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, 
                                                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
