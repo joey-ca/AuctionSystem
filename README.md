@@ -1,1 +1,1 @@
-# AuctionSystem
+Auction System is a comprehensive Java system, involving both server side and client side, which provides a variety of features such as registering, bidding, querying etc. The system is built on Client/Server architecture by means of a group of Java packages like I/O, AWT, Swing, Net, Util etc.
